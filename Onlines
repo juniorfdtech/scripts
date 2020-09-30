@@ -1,0 +1,8 @@
+#!/bin/bash
+fun_onlines () {
+for user in $(cat /etc/passwd |awk -F : '$3 > 900 {print $1}' |grep -vi "nobody");do
+    [[ "$(cat /etc/openvpn/openvpn-status.log | grep -Ec ,"$user",)" != "0" ]] && for usr in $(grep -Eo ,"$user", /etc/openvpn/openvpn-status.log | cut -d "," -f2); do echo "sshd: $usr [priv]"; done
+done
+ps aux | grep priv | grep Ss | awk -F " " '{print $11,$12,$13}'
+}
+[[ -e /etc/openvpn/openvpn-status.log ]] && fun_onlines || ps aux | grep priv | grep Ss | awk -F " " '{print $11,$12,$13}'
