@@ -1,0 +1,79 @@
+#!/bin/bash
+rm -f /tmp/sshmon-tmpdata.tmp
+rm -f /tmp/pid
+rm -f /tmp/pid2
+rm -f /tmp/pids
+rm -f /tmp/sks
+echo -n > /tmp/pid2
+ps ax|grep dropbear > /tmp/pid
+cat /tmp/pid | grep -i 'dropbear -p' > /tmp/pids
+cat /var/log/auth.log |  grep -i "Password auth succeeded" > /tmp/sks
+perl -pi -e 's/Password auth succeeded for//g' /tmp/sks
+perl -pi -e 's/dropbear//g' /tmp/sks
+
+cat /tmp/pid | while read line;do
+set -- $line
+p=$1
+var=`cat /tmp/sks | grep -i $1`
+set -- $var
+if [ "$6" != '' ]
+then
+l=`echo $6 | sed -r "s/'//g"`
+
+echo "$l $p $3 DropBear" | sort >> /tmp/sshmon-tmpdata.tmp
+
+fi
+ done
+ps -ef | grep sshd | grep priv | awk '{print $9,"   ",$2,"  ",$5,"  OpenSSH"}' | sort >> /tmp/sshmon-tmpdata.tmp
+openetwork=`grep "server " /etc/openvpn/server.conf | awk '{print $2}' | awk -F'.' '{print $1"."$2}'`
+grep $openetwork /etc/openvpn/openvpn-status.log | awk -F, '{print $2,$4}' | awk '{print $1,$4"-"$3,$5,"  OpenVPN"}' | sort >> /tmp/sshmon-tmpdata.tmp
+
+    rm -f /tmp/pid
+    rm -f /tmp/pid2
+    rm -f /tmp/pids
+    rm -f /tmp/sks
+
+
+
+#fun_monitor | awk '{print $1,$3}' | sed '/|/d' | sed '/root/d' > /tmp/sshmon-tmpdata.tmp
+database="/tmp/sshmon-tmpdata.tmp"
+#echo -e "\E[44;1;37m                 MONITOR DE CLIENTES             \E[0m"
+#echo -e "\E[44;1;37m                                                 \E[0m"
+echo -e "\E[44;1;37m Usuario       Conexão          Tipo     Tempo   \E[0m"
+	while read usline
+	do
+		user="$(echo $usline | awk '{print $1}')"
+   time="$(echo $usline | awk '{print $3}')"
+   tipo="$(echo $usline | awk '{print $4}')"
+		if [ -z "$user" ] ; then
+			echo "" > /dev/null
+		else
+			#grep $user $database > /tmp/tmp2
+			#grep $user /etc/openvpn/openvpn-status.log | grep 192.168 | awk -F, '{print $2}'>> /tmp/tmp2
+			s1ssh="$(grep -w $user $database | wc -l)"
+			s2ssh="$(grep -w $user /root/usuarios.db | awk '{print $2}')"
+			if [ -z "$s2ssh" ]; then
+			 s2ssh="+"
+			fi
+   if [ "$user" == "unknown" ]; then
+   kill $(grep -w $user $database | cut -d' ' -f2 | tr '\n' ' ') > /dev/null 2>&1
+   fi
+    echo -ne "\033[1;33m"
+#    printf '%-15s%-8s%-10s%s\n' " $user"      "$s1ssh/$s2ssh" "$time" 
+    printf '%-17s%-14s%-10s%s\n' " $user"      "$s1ssh/$s2ssh" "$tipo" "$time"
+    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+
+fi
+	done < "$database"
+  total=`grep -w DropBear $database | wc -l`
+  totalssh=`grep -w OpenSSH $database | wc -l`
+  totalovpn=`grep -w OpenVPN $database | wc -l`
+  totalgeral=$(($total+$totalssh+$totalovpn))
+
+   rm -f "$database"
+echo -e "\033[1;33m TOTAL OPENSSH  :                    $totalssh online    "
+echo -e "\033[1;33m TOTAL DROPBEAR :                    $total online   "
+echo -e "\033[1;33m TOTAL OPENVPN  :                    $totalovpn online    "
+echo -e "\033[1;33m TOTAL GERAL    :                    $totalgeral online   "
+echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+echo ""
