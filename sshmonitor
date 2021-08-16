@@ -25,8 +25,8 @@ echo "$l $p $3 DropBear" | sort >> /tmp/sshmon-tmpdata.tmp
 fi
  done
 ps -ef | grep sshd | grep priv | awk '{print $9,"   ",$2,"  ",$5,"  OpenSSH"}' | sort >> /tmp/sshmon-tmpdata.tmp
-openetwork=`grep "server " /etc/openvpn/server.conf | awk '{print $2}' | awk -F'.' '{print $1"."$2}'`
-grep $openetwork /etc/openvpn/openvpn-status.log | awk -F, '{print $2,$4}' | awk '{print $1,$4"-"$3,$5,"  OpenVPN"}' | sort >> /tmp/sshmon-tmpdata.tmp
+#openetwork=`grep "server " /etc/openvpn/server.conf | awk '{print $2}' | awk -F'.' '{print $1"."$2}'`
+#grep $openetwork /etc/openvpn/openvpn-status.log | awk -F, '{print $2,$4}' | awk '{print $1,$4"-"$3,$5,"  OpenVPN"}' | sort >> /tmp/sshmon-tmpdata.tmp
 
     rm -f /tmp/pid
     rm -f /tmp/pid2
