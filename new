@@ -11,7 +11,7 @@ echo ""
 echo -ne "\033[1;33mDIGITE SUA SENHA ROOT\033[1;37m: "; read senha
 echo -e "\033[1;32mOK\033[1;37m"
 echo ""
-echo -e "\033[1;32mAGUARDE..."
+echo -e "\033[1;32mAGUARDE...\033[1;37m"
 echo ""
 apt-get install apache2 -y
 apt-get install cron curl unzip dirmngr apt-transport-https -y
@@ -49,9 +49,9 @@ unzip -o internet4g.zip
 rm -rf internet4g.zip index.html 
 sleep 1
 mysql -h localhost -u root -p$senha -e "CREATE DATABASE internet4g" 
-echo -e "\033[1;32mFINALIZANDO INSTALAÇÃO...\033[0m"
+clear
+echo -e "\033[1;33mFINALIZANDO INSTALAÇÃO...\033[0m"
 echo ""
-sleep 1
 echo -e "\033[1;32mESCOLHA OS DADOS DA REVENDA:"
 echo -ne "\033[1;33m"
 read -p "Nome do Admin: " nome
